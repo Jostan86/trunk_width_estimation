@@ -3,7 +3,7 @@ import struct
 import pickle
 import time
 
-from width_estimation import TrunkAnalyzer
+from trunk_width_estimation import TrunkAnalyzer
 
 
 

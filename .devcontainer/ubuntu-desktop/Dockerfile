@@ -56,7 +56,7 @@ RUN cd ~/ros2_ws && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build
 RUN sudo apt update && sudo apt upgrade -y
 
 # These (should / should help to) force the gui applications to show up only on the remote display window
-RUN echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/width_estimation" >> ~/.bashrc
+RUN echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/trunk_width_estimation" >> ~/.bashrc
 
 # Source the ROS setup file
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc

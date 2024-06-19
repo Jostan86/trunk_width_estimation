@@ -5,7 +5,7 @@ from cv_bridge import CvBridge
 from pf_orchard_interfaces.msg import TreeImageData, TreeInfo, TreePosition
 from pf_orchard_interfaces.srv import TreeImageProcessing
 
-from width_estimation import TrunkAnalyzer, PackagePaths
+from trunk_width_estimation import TrunkAnalyzer, PackagePaths
 #!/usr/bin/env python
 
 class TrunkWidthEstimationService(Node):

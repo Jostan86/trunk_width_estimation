@@ -49,8 +49,7 @@ RUN sudo apt-get update && \
 # # Update all packages
 # RUN sudo apt update && sudo apt upgrade -y
 
-# # Install Git
-# RUN sudo apt install -y git
+RUN echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/trunk_width_estimation" >> ~/.bashrc
 
 # These (should / should help to) force the gui applications to show up only on the remote display window
 RUN echo "export DISPLAY=:0" >> ~/.bashrc

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="width_estimation",
+    name="trunk_width_estimation",
     version="0.1.0",
     description="A short description of your project",
     long_description=open('README.md').read(),

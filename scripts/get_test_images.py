@@ -2,7 +2,7 @@ import rosbag
 import cv2
 import os
 from cv_bridge import CvBridge
-from width_estimation import PackagePaths
+from trunk_width_estimation import PackagePaths
 
 package_paths = PackagePaths()
 

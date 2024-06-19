@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 import os
-from width_estimation import PackagePaths
+from trunk_width_estimation import PackagePaths
 
 package_paths = PackagePaths()
 

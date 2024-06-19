@@ -1,7 +1,7 @@
 import cv2
 import os
 import time
-from width_estimation import TrunkAnalyzer, PackagePaths
+from trunk_width_estimation import TrunkAnalyzer, PackagePaths
 
 package_paths = PackagePaths()
 
