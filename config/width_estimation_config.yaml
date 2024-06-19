@@ -1,0 +1,28 @@
+# YAML Config file for the width estimation application
+
+# # ----------------------
+# # Settings for cherry dataset
+# # ----------------------
+# # Path to the model file
+# # Must be in the data/models directory
+# model_to_use: "last_l_cherry_v2.pt"
+
+# # make list of classes to remove from the output
+# ignore_classes: []
+
+# trunk_class: 1
+# post_class: 0
+
+
+# ----------------------
+# Settings for jazz apple dataset
+# ----------------------
+# Path to the model file
+# Must be in the data/models directory
+model_to_use: "jazz_s_v8.pt"
+
+# make list of classes to remove from the output
+ignore_classes: [1]
+
+trunk_class: 2
+post_class: 0

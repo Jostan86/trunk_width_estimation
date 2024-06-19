@@ -1,0 +1,57 @@
+Some notes about the stuff here.
+
+Models
+------------------------------
+jazz_s_float32_v8.engine 
+    made with: model.export(format="engine", imgsz=(480, 640))  
+    run with:
+        yolo_model = YOLO("/trunk_width_estimation/jazz_s_float32_v8.engine", task="segment")
+        results = yolo_model.predict(image, imgsz=(480, 640))
+    mean gpu time = 0.0285
+
+jazz_s_float16_v8.engine 
+    made with: model.export(format="engine", imgsz=(480, 640), half=True, workspace=8.0)  
+    run with:
+        yolo_model = YOLO("/trunk_width_estimation/jazz_s_float16_v8.engine", task="segment")
+        results = yolo_model.predict(image, imgsz=(480, 640))
+    mean gpu time = 0.0256
+
+jazz_s_8gb_v8.pt 
+    this is the original model
+    run with:
+        yolo_model = YOLO("/trunk_width_estimation/jazz_s_v8.pt")
+        results = yolo_model.predict(image, imgsz=(480, 640))
+    mean gpu time = 0.0347
+------------------------------
+
+    Those all seem to work well. But note they should probably be rebuilt if the setup changes at all.
+
+    I tried making one with the int8 precision but could not seem to get it to work. I tried:
+    model.export(format="engine", imgsz=(480, 640), int8=True, workspace=6, data="/trunk_width_estimation/jazz_dataset_yolov8/data.yaml")
+    model.export(format="engine", imgsz=(480, 640), int8=True, data="/trunk_width_estimation/jazz_dataset_yolov8/data.yaml")
+
+    And some other stuff, i also deleted the jazz_s_v8.cache and the labels.cashe file (in the dataset) and this didn't seem to help. I'm not sure what the deal is.
+    It may have something to do with the dataset, I set all the paths to the training images, just because there's more and i don't think it really matters, that 
+    worked but didn't help.  I also exported the data set to have fixed size images, that didn't really seem to make much difference. 
+    I'm not sure what the deal is, it doens't seem to be detecting anything though...
+
+    It was run with:
+        yolo_model = YOLO("/trunk_width_estimation/jazz_s_int8_v8.engine", task="segment")
+        results = yolo_model.predict(image, imgsz=(480, 640), int8=True, task="segment")
+
+    I think the next thing to try would maybe be matching the settings here (https://docs.ultralytics.com/integrations/tensorrt/#configuring-int8-export) exactly, and
+    exporting the dataset again and doing something different with the sizing. Idk what though...
+
+    Alright, well i tried this in the command line and it seemed to work... Not sure if the batch number did the trick or it just needed to be in command line
+        yolo export model=jazz_s_v8.pt format=engine batch=8 workspace=4 int8=True data=jazz_dataset_yolov8/data.yaml
+
+    The inference time was like 0.021, but it was pretty shit (but existant at least...), so I don't think it'll work for me.
+
+    Well, now it isn't working again. Very confused but i don't really care that much, i need to move on.
+
+------------------------------
+
+Helpful links:
+https://docs.ultralytics.com/modes/export/#export-formats
+https://docs.ultralytics.com/integrations/tensorrt/#usage
+https://docs.ultralytics.com/guides/nvidia-jetson/
