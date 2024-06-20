@@ -1,6 +1,6 @@
 # FROM dustynv/pytorch:1.11-r35.3.1
 # FROM ultralytics/ultralytics:latest-jetson
-FROM this_container:l4t-r36.3.0-onnxruntime
+FROM this_container:l4t-r36.3.0
 USER root
 
 # Install stuff, if you have any
@@ -45,14 +45,31 @@ RUN sudo apt-get update && \
     python3-pyqt5 \
     && sudo rm -rf /var/lib/apt/lists/*
 
-    
+# Make a ros2 workspace
+RUN mkdir -p ~/ros2_ws/src
+
+# Clone the interface pacakge into the workspace
+RUN cd ~/ros2_ws/src && git clone https://github.com/Jostan86/pf_orchard_interfaces.git
+
+# set the ROS_DISTRO
+ENV ROS_DISTRO=humble
+
+# Build the workspace
+RUN cd ~/ros2_ws && . /opt/ros/${ROS_DISTRO}/install/setup.sh && colcon build
+
 # # Update all packages
 # RUN sudo apt update && sudo apt upgrade -y
 
 RUN echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/trunk_width_estimation" >> ~/.bashrc
+
+# Source the ROS2 workspaces
+RUN echo "source /opt/ros/${ROS_DISTRO}/install/setup.bash" >> ~/.bashrc
+RUN echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 # These (should / should help to) force the gui applications to show up only on the remote display window
 RUN echo "export DISPLAY=:0" >> ~/.bashrc
 RUN echo "export REMOTE_CONTAINERS_DISPLAY_SOCK=/tmp/.X11-unix/X0" >> ~/.bashrc
 
 USER root
+
+ARG CACHEBUST=1
