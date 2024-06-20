@@ -1,5 +1,5 @@
 {
-  "name": "trunk_width_estimation",
+  "name": "trunk_width_estimation_jetson",
   "dockerFile": "Dockerfile",
   // "image": "ultralytics/ultralytics:latest-jetson",
   "extensions": [
