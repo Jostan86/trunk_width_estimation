@@ -16,7 +16,7 @@ class TrunkSegmenter:
 
         # Load the model
         weight_path = os.path.join(package_paths.model_dir, config_data["model_to_use"])
-        self.yolo_model = YOLO(weight_path)
+        self.yolo_model = YOLO(weight_path, task="segment")
 
         # Put an image through the model to initialize the model
         startup_image = cv2.imread(package_paths.startup_image_path)

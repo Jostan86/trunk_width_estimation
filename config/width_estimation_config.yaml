@@ -19,7 +19,8 @@
 # ----------------------
 # Path to the model file
 # Must be in the data/models directory
-model_to_use: "jazz_s_v8.pt"
+# model_to_use: "jazz_s_v8.pt"
+model_to_use: "jazz_s_float16_v8.engine"
 
 # make list of classes to remove from the output
 ignore_classes: [1]

@@ -6,8 +6,8 @@ from trunk_width_estimation import PackagePaths
 
 package_paths = PackagePaths()
 
-model_path = package_paths.models_dir + "/jazz_s_v8.engine"
-
+model_path = package_paths.model_dir + "/jazz_s_float16_v8.engine"
+# model_path = package_paths.model_dir + "/jazz_s_v8.pt"
 yolo_model = YOLO(model_path, task="segment")
 # yolo_model = YOLO("jazz_s_v8.pt")
 

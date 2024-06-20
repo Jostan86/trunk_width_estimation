@@ -7,7 +7,7 @@ package_paths = PackagePaths()
 
 times = []
 
-trunk_segmenter = TrunkAnalyzer(combine_segmenter=True)
+trunk_segmenter = TrunkAnalyzer(package_paths, combine_segmenter=True)
 
 for rgb_image_path, depth_image_path in zip(package_paths.rgb_test_image_paths, package_paths.depth_test_image_paths):
     
@@ -23,7 +23,7 @@ for rgb_image_path, depth_image_path in zip(package_paths.rgb_test_image_paths, 
     if seg_img is not None:
         print("Widths:", widths)
         cv2.imshow('output', seg_img)
-        cv2.waitKey(50)
+        cv2.waitKey(25)
     
 cv2.destroyAllWindows()
 
