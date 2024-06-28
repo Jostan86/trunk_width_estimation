@@ -15,6 +15,7 @@ setup(
         "scikit-image",
         "ultralytics",
         "numpy",
+        "pydantic",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

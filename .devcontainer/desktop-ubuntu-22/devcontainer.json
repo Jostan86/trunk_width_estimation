@@ -1,5 +1,5 @@
 {
-  "name": "trunk_width_estimation_ubuntu-desktop",
+  "name": "width_estimation_ubuntu-desktop-no-ros",
   "dockerFile": "Dockerfile",
   "extensions": [
     "ms-python.python",
