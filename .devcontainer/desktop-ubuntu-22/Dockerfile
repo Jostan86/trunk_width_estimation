@@ -1,20 +1,23 @@
 FROM ubuntu:22.04
 
-ARG CACHEBUST=1
+# ARG CACHEBUST=1
 
 USER root
+
+# turn off interactive installation
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install stuff, if you have any
 RUN apt-get update \
     && apt-get install -y \
     git \
     python3-pip \
-    # python3-opencv \
-    libgl1 \
-    libglib2.0-0 \
-    libxrender1 \
-    libsm6 \
-    libxext6 \
+    python3-opencv \
+    # libgl1 \
+    # libglib2.0-0 \
+    # libxrender1 \
+    # libsm6 \
+    # libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Add vscode user with same UID and GID as your host system
