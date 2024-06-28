@@ -10,14 +10,26 @@ If familiar, the easiest way to get started is likely using a VSCode devcontaine
 Alternatively, the dockerfile in the devcontainer folder could also be used to make a docker container and developement can be done in there. 
 
 ### Option 2: Ubuntu 20.04/22.04
-A python virtual environment on linux should also work fine. The only python packages needed are the following:
+A python virtual environment on linux should also work fine.
+
+```cd /where/you/want/to/install/venv```
+
+```python3.10 venv -m trunk_width_venv```
+
+Then activate: ```source /path/to/venv/bin/activate```
+
+The only python packages needed are the following:
 
 ``` pip install ultralytics scikit-image opencv-python pydantic ```
 
-Cuda packages may be needed for ultralytics to work, refer to thier documentation for that.
+Cuda packages may be needed for ultralytics to work, refer to the ultralytics documentation for that.
 
 ### Installing the package
-Regardless of the option for dependencies, to install the package itself with pip, first download the repository, then run ```pip install -e /path/to/trunk_width_estimation```. 
+To install the package itself with pip, first download the repository, then install the package in editable mode.
+
+```git clone https://github.com/Jostan86/trunk_width_estimation.git```
+
+```pip install -e /path/to/trunk_width_estimation```
 
 ## Usage
-```usage_example.py``` in ```scripts/``` provides an example of how to use the trunk_segmenter and trunk_analyzer classes. It loads images from the ```/data/test_images/``` and displays the segmentations and prints the width_estimation results.
+```usage_example.py``` in ```scripts/``` provides an example of how to use the trunk_segmenter and trunk_analyzer classes. It loads images from  ```/data/test_images/``` and displays the segmentations and prints the width_estimation results. The path on line 119 must be set to to the root directory of the package for it to work.
