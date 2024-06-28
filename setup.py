@@ -12,9 +12,9 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[
-        # "scikit-image",
-        # "ultralytics",
-        # "numpy",
+        "scikit-image",
+        "ultralytics",
+        "numpy",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

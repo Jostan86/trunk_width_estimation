@@ -1,0 +1,69 @@
+# ----------------------
+# Settings for jazz apple dataset
+# ----------------------
+# Path to the model file
+# Must be in the data/models directory
+yolo_model_to_use: "jazz_s_v8.pt"  # for desktop
+# yolo_model_to_use: "jazz_s_float16_v8.engine"  # for jetson
+
+
+# make list of classes to remove from the output 
+ignore_classes: [1]  # removing the sprinklers
+
+
+# The class number for the trunk and post classes
+trunk_class: 2   
+post_class: 0
+
+
+# The camera horizontal field of view in degrees
+# For realsense with 640x480 resolution
+camera_horizontal_fov: 55.0  # degrees
+# For realsense with 848x480 or 1280x720 resolution
+# horz_fov: 69.4  # degrees
+
+
+# Some settings for calculating the pixel width of the mask
+# Length of the segment to use for calculating the local angle of the trunk
+pixel_width_segment_length: 15  # pixels
+# Cutoff for the top and bottom of the mask to ignore when calculating the width
+pixel_width_cutoff_top_bottom: 0.3  # percentage of the mask height
+# idk tbh
+pixel_width_cutoff_derivative: 0.4 # 
+# Window size for .... something
+pixel_width_window_size: 20  # pixels, must be even
+
+
+# Proportion of the top of the image to ignore mask points in when calculating the depth.
+depth_calc_top_ignore: 0.5
+# Proportion of the bottom of the image to ignore mask points in when calculating the depth.
+depth_calc_bottom_ignore: 0.2
+# Minimum number of valid depth points needed to keep the mask, if less than this, disregard the mask.
+depth_calc_min_num_points: 500
+# Percentile of the depth values to use for the percentile depth estimate. So at 65, the percentile depth will be 
+# farther than 65% of the points in the mask.
+depth_calc_percentile: 0.70
+
+# The threshold for the non-maximum suppression algorithm for differing classes (Yolo does it for the same class)
+filter_nms_overlap_threshold: 0.3
+
+# The maximum distance allowed for trees, if farther than this the segmentation is removed
+filter_depth_max_depth: 2.0
+
+# Proportion of the image width that is considered the edge in the edge filter, if filter_edge_size_threshold percent of
+# the mask is in this region, the segmentation is removed.
+filter_edge_edge_threshold: 0.05
+filter_edge_size_threshold: 0.1
+
+# If the bottom of the mask is above this threshold, the mask is considered to be too high.
+filter_position_bottom_threshold: 0.5
+# If the top of the mask is below this threshold, the mask is considered to be too low.
+filter_position_top_threshold: 0.65
+# Not actually used
+filter_position_score_threshold: 0.9
+
+# Used to correct the width based on the position of the object in the image, as objects near the edge of the image
+# appear wider than they are.
+width_correction_slope: -0.000028 # meters per pixel
+width_correction_intercept: 0.001 # meters
+do_width_correction: True

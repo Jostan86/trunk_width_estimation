@@ -1,1 +1,0 @@
-echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/home/jostan/OneDrive/Docs/Grad_school/Research/code_projects/trunk_width_estimation" >> ~/.bashrc
