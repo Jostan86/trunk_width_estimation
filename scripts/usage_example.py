@@ -5,10 +5,8 @@ from trunk_width_estimation import TrunkAnalyzer, TrunkSegmenter, PackagePaths
 import copy
 
 
-def display_images(start_img=0):
+def display_images(package_paths, start_img=0):
     """This function will display the segmented images in the test images folder one at a time. """
-    
-    package_paths = get_package_paths()
 
     trunk_analyzer = TrunkAnalyzer(package_paths, combine_segmenter=True)
 
@@ -44,12 +42,9 @@ def display_images(start_img=0):
     cv2.destroyAllWindows()
 
 
-def display_images_segmenter_separate(start_img=0):
+def display_images_segmenter_separate(package_paths, start_img=0):
     """This function will also display the segmented images in the test images folder one at a time, but the 
     segmenter and analyzer are separate. It also displays the segmented image before and after the analyzer."""
-
-    
-    package_paths = get_package_paths()
 
     trunk_analyzer = TrunkAnalyzer(package_paths, combine_segmenter=False)
     trunk_segmenter = TrunkSegmenter(package_paths)
@@ -91,15 +86,6 @@ def display_images_segmenter_separate(start_img=0):
         
     cv2.destroyAllWindows()
 
-def get_package_paths():
-    # Set the package path environment variable
-    package_path = "/trunk_width_estimation"
-    os.environ['WIDTH_ESTIMATION_PACKAGE_PATH'] = package_path
-
-    # Load the package paths
-    package_paths = PackagePaths(config_file="width_estimation_config_apple.yaml")
-    
-    return package_paths
 
 def cv2_wait():
     # This is needed because cv2.imshow isn't working in docker right
@@ -128,9 +114,17 @@ def visualize_depth_image(depth_image):
     
 if __name__ == "__main__":
     
+    # ----- This path needs to be set -----
+    # Set the package path environment variable. Package path is the path to the trunk_width_estimation folder.
+    package_path = "/trunk_width_estimation"
+    os.environ['WIDTH_ESTIMATION_PACKAGE_PATH'] = package_path
+    # Load the package paths
+    package_paths = PackagePaths(config_file="width_estimation_config_apple.yaml")
+    
+    
     # There are two ways to use the trunk analyzer, it can be combined with the segmenter or kept separate. The
     # ability to seperate was mainly added to allow for parallel processing of the analysis on the previous reults while
     # segmenting the next image. The combined version is slightly easier to use and is the default. 
     
-    display_images(start_img=200)
+    display_images(package_paths, start_img=200)
     # display_images_segmenter_separate(start_img=200)

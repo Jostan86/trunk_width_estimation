@@ -13,11 +13,11 @@ RUN apt-get update \
     git \
     python3-pip \
     python3-opencv \
-    # libgl1 \
-    # libglib2.0-0 \
-    # libxrender1 \
-    # libsm6 \
-    # libxext6 \
+    libgl1 \
+    libglib2.0-0 \
+    libxrender1 \
+    libsm6 \
+    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Add vscode user with same UID and GID as your host system
