@@ -1,4 +1,3 @@
-
 import numpy as np
 from ultralytics import YOLO
 import cv2
@@ -182,7 +181,7 @@ class TrunkAnalyzer:
                 keep[i] = False
                 continue
 
-            # Calculate median and percentile depth
+            # Calculate percentile depth
             self._depth_estimates[i] = np.percentile(masked_depth, depth_filter_percentile) / 1000
 
         # Update the arrays
