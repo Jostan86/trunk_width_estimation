@@ -191,8 +191,6 @@ class TrunkAnalyzer:
         """Calculates the best estimate of the width of the tree in meters.
         """
 
-        
-
         # Loop through each mask
         for i, (mask, depth) in enumerate(zip(self._masks, self._depth_estimates)):
 
@@ -257,8 +255,6 @@ class TrunkAnalyzer:
 
         width_estimate = np.percentile(corrected_widths, self._parameters.pixel_width_percentile)
         
-        print(width_estimate)
-        
         return width_estimate
 
     def _mask_filter_nms(self, overlap_threshold: float):
@@ -315,6 +311,7 @@ class TrunkAnalyzer:
         Returns:
             Updates the class arrays to only include the masks that are within the depth threshold.
         """
+        
         keep = self._depth_estimates < depth_threshold
         self._remove_faulty_instances(keep)
 
