@@ -551,8 +551,8 @@ class TrunkAnalyzer:
         # self.tree_widths = -2.088e-05 * img_x_positions_rel_middle + self.tree_widths
         if self._parameters.do_width_correction:
             img_x_positions_rel_middle = abs(self._img_x_positions - int(self._original_width / 2))
-            self._tree_widths = self._tree_widths - self._parameters.width_correction_slope * img_x_positions_rel_middle \
-                                - self._parameters.width_correction_intercept
+            self._tree_widths = self._tree_widths + self._parameters.width_correction_slope * img_x_positions_rel_middle \
+                                + self._parameters.width_correction_intercept
 
         if self._combine_segmenter:
             results = results[self._results_kept]
