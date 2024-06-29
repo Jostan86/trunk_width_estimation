@@ -126,5 +126,5 @@ if __name__ == "__main__":
     # ability to seperate was mainly added to allow for parallel processing of the analysis on the previous reults while
     # segmenting the next image. The combined version is slightly easier to use and is the default. 
     
-    display_images(package_paths, start_img=200)
+    display_images(package_paths, start_img=1)
     # display_images_segmenter_separate(start_img=200)

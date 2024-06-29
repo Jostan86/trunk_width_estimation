@@ -14,6 +14,7 @@ class ParametersWidthEstimation(BaseModel):
     
     
     pixel_width_segment_length: int
+    pixel_width_percentile: float
     
     depth_calc_top_ignore: float
     depth_calc_bottom_ignore: float

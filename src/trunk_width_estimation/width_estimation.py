@@ -109,12 +109,8 @@ class TrunkAnalyzer:
         self._masks = None
         self._classes = None
         self._results_kept = None
-
-        self._depth_calculated = False
-        self._width_calculated = False
         
-        self._depth_median = None
-        self._depth_percentile = None
+        self._depth_estimates = None
 
         self._num_instances = None
         self._cropped_width = None
@@ -136,7 +132,7 @@ class TrunkAnalyzer:
     def _calculate_depth(self, top_ignore: float, bottom_ignore: float, min_num_points: int, 
                         depth_filter_percentile: float):
         """
-        Calculates the best estimate of the distance between the tree and camera. Calculates the median depth and 
+        Calculates the best estimate of the distance between the tree and camera. Calculates the depth estimate as the 
         percentile depth for each mask. Also filters out masks that have less than min_num_points valid points 
         in the region defined by top_ignore and bottom_ignore.
 
@@ -148,9 +144,8 @@ class TrunkAnalyzer:
            
         """
 
-        # Initialize arrays to store the depth values and the tree locations
-        self._depth_median = np.zeros(self._num_instances)
-        self._depth_percentile = np.zeros(self._num_instances)
+        # Initialize array to store the depth values and the tree locations
+        self._depth_estimates = np.zeros(self._num_instances)
 
         # Make boolean array of indices to keep
         keep = np.ones(self._num_instances, dtype=bool)
@@ -188,25 +183,22 @@ class TrunkAnalyzer:
                 continue
 
             # Calculate median and percentile depth
-            self._depth_median[i] = np.median(masked_depth) / 1000
-            self._depth_percentile[i] = np.percentile(masked_depth, depth_filter_percentile) / 1000
+            self._depth_estimates[i] = np.percentile(masked_depth, depth_filter_percentile) / 1000
 
         # Update the arrays
-        self._depth_calculated = True
         self._remove_faulty_instances(keep)
             
     def _calculate_width(self):
         """Calculates the best estimate of the width of the tree in meters.
         """
 
-        self._tree_widths = np.zeros(self._num_instances)
-        self._tree_locations = np.zeros((self._num_instances, 2))
+        
 
         # Loop through each mask
-        for i, (mask, depth) in enumerate(zip(self._masks, self._depth_median)):
+        for i, (mask, depth) in enumerate(zip(self._masks, self._depth_estimates)):
 
             # Get the diameter of the tree in pixels
-            pixel_width = self._calculate_pixel_width(mask)
+            pixel_width_estimate = self._calculate_pixel_width(mask)
 
             horz_fov = self._parameters.camera_horizontal_fov
 
@@ -217,21 +209,15 @@ class TrunkAnalyzer:
             distperpix = image_width_m / self._original_width
 
             # Calculate the diameter of the tree in meters
-            diameter_m = pixel_width * distperpix
-
-            # If there are no valid widths, set the width to 0, otherwise set it to the max width
-            if len(diameter_m) == 0:
-                self._tree_widths[i] = 0
-            else:
-                self._tree_widths[i] = np.max(diameter_m)
+            diameter_m = pixel_width_estimate * distperpix
+            
+            self._tree_widths[i] = diameter_m
 
             # Calculate the x location of the tree in the image (in pixels) by taking the median of the mask points in x
             # TODO: This value should be able to be used for the img_x_positions instead of recalculating it later
             self._img_x_positions[i] = np.median(np.where(mask)[1])
-            self._tree_locations[i, 1] = self._depth_median[i]
+            self._tree_locations[i, 1] = self._depth_estimates[i]
             self._tree_locations[i, 0] = (self._img_x_positions[i] - (self._original_width / 2)) * distperpix
-
-        self._width_calculated = True
 
     def _calculate_pixel_width(self, mask: np.ndarray) -> np.ndarray:
         """Get the width of the segmentation in pixels. Note that this method is different than in the paper, but
@@ -270,7 +256,11 @@ class TrunkAnalyzer:
             # Correct the width based on the angle of the tree at that location
             corrected_widths[i:i + segment_length] = widths[i:i + segment_length] * np.abs(np.sin(angle))
 
-        return corrected_widths
+        width_estimate = np.percentile(corrected_widths, self._parameters.pixel_width_percentile)
+        
+        print(width_estimate)
+        
+        return width_estimate
 
     def _mask_filter_nms(self, overlap_threshold: float):
         """Apply non-maximum suppression (NMS) to remove overlapping masks of different classes. 
@@ -326,7 +316,7 @@ class TrunkAnalyzer:
         Returns:
             Updates the class arrays to only include the masks that are within the depth threshold.
         """
-        keep = self._depth_percentile < depth_threshold
+        keep = self._depth_estimates < depth_threshold
         self._remove_faulty_instances(keep)
 
     def _mask_filter_edge(self, edge_threshold: float, size_threshold: float):
@@ -435,14 +425,10 @@ class TrunkAnalyzer:
         self._classes = self._classes[keep_indices]
         self._num_instances = len(self._masks)
         self._img_x_positions = self._img_x_positions[keep_indices]
-
-        # Update the depth and width arrays if they have been calculated
-        if self._depth_calculated:
-            self._depth_median = self._depth_median[keep_indices]
-            self._depth_percentile = self._depth_percentile[keep_indices]
-        if self._width_calculated:
-            self._tree_widths = self._tree_widths[keep_indices]
-            self._tree_locations = self._tree_locations[keep_indices]
+        
+        self._depth_estimates = self._depth_estimates[keep_indices]
+        self._tree_widths = self._tree_widths[keep_indices]
+        self._tree_locations = self._tree_locations[keep_indices]
 
     def _setup_arrays(self, results_dict: dict):
         """Setup the arrays for analysis using the results dict from the model.
@@ -457,13 +443,19 @@ class TrunkAnalyzer:
         self._classes = results_dict["classes"]
         self._results_kept = results_dict["results_kept"]
         
-        self._img_x_positions = np.zeros(self._num_instances, dtype=np.int32)
-
-        # Remove any sprinklers if desired
-        if self._num_instances is not None:
+        if self._num_instances is None:
+            self._img_x_positions = None
+            self._tree_widths = None
+            self._tree_locations = None
+            self._depth_estimates = None
+        else:
+            self._img_x_positions = np.zeros(self._num_instances, dtype=np.int32)
+            self._tree_widths = np.zeros(self._num_instances)
+            self._tree_locations = np.zeros((self._num_instances, 2))
+            self._depth_estimates = np.zeros(self._num_instances)
             keep_indices = np.isin(self._classes, self._ignore_classes, invert=True)
             self._remove_faulty_instances(keep_indices)
-            
+
     def _new_image_reset(self, results_dict: dict, depth_image: np.ndarray):
         """ Resets the class variables for a new image.
 
@@ -471,18 +463,6 @@ class TrunkAnalyzer:
             results_dict (dict): Results from the image segmentation model
             depth_image (np.ndarray): aligned depth image that corresponds to the image
         """
-
-        self._confidences = None
-        self._masks = None
-        self._results_kept = None
-
-        self._depth_calculated = False
-        self._depth_median = None
-        self._depth_percentile = None
-        self._tree_locations = None
-
-        self._width_calculated = False
-        self._tree_widths = None
 
         self._setup_arrays(results_dict)
 

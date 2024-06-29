@@ -24,6 +24,8 @@ camera_horizontal_fov: 55.0  # degrees
 
 # Length of the segment to use for calculating the local angle of the trunk when calculating the pixel width of the mask
 pixel_width_segment_length: 15  # pixels
+# Percentile of the pixel width to use for the pixel width estimate. So at 0.5, it's just the median.
+pixel_width_percentile: 50.0
 
 # Proportion of the top of the image to ignore mask points in when calculating the depth.
 depth_calc_top_ignore: 0.5
@@ -31,9 +33,9 @@ depth_calc_top_ignore: 0.5
 depth_calc_bottom_ignore: 0.2
 # Minimum number of valid depth points needed to keep the mask, if less than this, disregard the mask.
 depth_calc_min_num_points: 500
-# Percentile of the depth values to use for the percentile depth estimate. So at 65, the percentile depth will be 
-# farther than 65% of the points in the mask.
-depth_calc_percentile: 0.70
+# Percentile of the depth values to use for the depth estimate. So at 65, the percentile depth will be farther than 
+# 65% of the points in the mask.
+depth_calc_percentile: 65.0
 
 # The threshold for the non-maximum suppression algorithm for differing classes (Yolo does it for the same class)
 filter_nms_overlap_threshold: 0.3
