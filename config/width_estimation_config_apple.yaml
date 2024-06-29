@@ -22,17 +22,8 @@ camera_horizontal_fov: 55.0  # degrees
 # For realsense with 848x480 or 1280x720 resolution
 # horz_fov: 69.4  # degrees
 
-
-# Some settings for calculating the pixel width of the mask
-# Length of the segment to use for calculating the local angle of the trunk
+# Length of the segment to use for calculating the local angle of the trunk when calculating the pixel width of the mask
 pixel_width_segment_length: 15  # pixels
-# Cutoff for the top and bottom of the mask to ignore when calculating the width
-pixel_width_cutoff_top_bottom: 0.3  # percentage of the mask height
-# idk tbh
-pixel_width_cutoff_derivative: 0.4 # 
-# Window size for .... something
-pixel_width_window_size: 20  # pixels, must be even
-
 
 # Proportion of the top of the image to ignore mask points in when calculating the depth.
 depth_calc_top_ignore: 0.5

@@ -14,9 +14,6 @@ class ParametersWidthEstimation(BaseModel):
     
     
     pixel_width_segment_length: int
-    pixel_width_cutoff_top_bottom: float
-    pixel_width_cutoff_derivative: float
-    pixel_width_window_size: int
     
     depth_calc_top_ignore: float
     depth_calc_bottom_ignore: float
@@ -55,10 +52,7 @@ class ParametersWidthEstimation(BaseModel):
             logging.error(f"Parameter file {file_path} does not have the correct fields or types.")
             logging.error(f"{e}")
             raise ValueError(f"Invalid data in parameter file: {e}")
-        
-        if parameters.pixel_width_window_size % 2 != 0:
-            raise ValueError("pixel_width_window_size must be an even number")
-        
+                
         parameters.log_settings()
         
         return parameters

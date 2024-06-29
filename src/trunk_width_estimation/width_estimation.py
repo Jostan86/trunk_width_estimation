@@ -270,34 +270,6 @@ class TrunkAnalyzer:
             # Correct the width based on the angle of the tree at that location
             corrected_widths[i:i + segment_length] = widths[i:i + segment_length] * np.abs(np.sin(angle))
 
-        #-------------------
-        # I'm not actually sure the following code is necessary, but I'm keeping it for now as it works and I haven't
-        # had time to thoroughly test the results without it. I'm also not totally sure what it's doing (I didn't write
-        # this part).
-        #-------------------
-        
-        # Cut off the top 30%  of the values and the bottom 30% of the values (if cutoff_amount is the default)
-        cut_off_dist = int(corrected_widths.shape[0] * self._parameters.pixel_width_cutoff_top_bottom)
-        corrected_widths_trimmed = np.cumsum(corrected_widths)[:-cut_off_dist]
-        corrected_widths_trimmed = corrected_widths_trimmed[cut_off_dist:]
-
-        # Calculate the difference between elements separated by a window of 20 (if window_size is the default) 
-        # in return_distance_axis_trimmed (effectively a discrete derivative)
-        window_size = self._parameters.pixel_width_window_size
-        return_distance_axis_derv = corrected_widths_trimmed[window_size:] - corrected_widths_trimmed[:-window_size]
-
-        # Keep only the smallest elements in the return_distance_axis_derv array, 40% of them if the default value is used
-        k = int(return_distance_axis_derv.shape[0] * self._parameters.pixel_width_cutoff_derivative)
-
-        # Find the indices of the k smallest elements in return_distance_axis_derv
-        idx1 = np.argpartition(return_distance_axis_derv, k)[:k]
-
-        # Calculate the real indices in the original return_distance_axis array
-        real_idx = idx1 + int(window_size/2) + cut_off_dist
-
-        # Retrieve the distances at the calculated indices
-        corrected_widths = corrected_widths[real_idx]
-
         return corrected_widths
 
     def _mask_filter_nms(self, overlap_threshold: float):
