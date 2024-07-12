@@ -1,13 +1,20 @@
 FROM osrf/ros:humble-desktop-full
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 USER root
 
 # Install stuff, if you have any
 RUN apt-get update \
     && apt-get install -y \
     git \
-    python3-pyqt5 \
     python3-pip \
+    python3-opencv \
+    libgl1 \
+    libglib2.0-0 \
+    libxrender1 \
+    libsm6 \
+    libxext6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Add vscode user with same UID and GID as your host system
@@ -31,9 +38,6 @@ RUN apt-get update \
 # Switch from root to user
 USER $USERNAME
 
-# Add user to video group to allow access to webcam
-RUN sudo usermod --append --groups video $USERNAME
-
 RUN sudo apt-get update && \
     pip install ultralytics \
     pip install scikit-image \ 
@@ -44,7 +48,7 @@ RUN sudo apt-get update && \
 RUN mkdir -p ~/ros2_ws/src
 
 # Clone the interface pacakge into the workspace
-RUN cd ~/ros2_ws/src && git clone https://github.com/Jostan86/pf_orchard_interfaces.git
+RUN cd ~/ros2_ws/src && git clone https://github.com/Jostan86/pf_orchard_interfaces.git -b main
 
 # set the ROS_DISTRO
 ENV ROS_DISTRO=humble
@@ -56,10 +60,12 @@ RUN cd ~/ros2_ws && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build
 RUN sudo apt update && sudo apt upgrade -y
 
 # These (should / should help to) force the gui applications to show up only on the remote display window
-RUN echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/trunk_width_estimation" >> ~/.bashrc
+RUN echo "export WIDTH_ESTIMATION_PACKAGE_PATH=/home/${USERNAME}/trunk_width_estimation" >> ~/.bashrc
 
 # Source the ROS setup file
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+
+ARG CACHEBUST=1
 
 USER root

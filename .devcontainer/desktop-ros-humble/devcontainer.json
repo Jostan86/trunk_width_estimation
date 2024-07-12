@@ -1,3 +1,28 @@
+// {
+//   "name": "width_estimation_ubuntu-desktop-with-ros",
+//   "dockerFile": "Dockerfile",
+//   "extensions": [
+//     "ms-python.python",
+//     "eamodio.gitlens",
+//     "ms-azuretools.vscode-docker"
+//   ],
+//   "runArgs": [
+//     "--privileged",
+//     "--network=host",
+//     "--ipc=host",
+//     "--env", "DISPLAY",
+//     // add gpu support
+//     "--gpus", "all",
+//     // "--runtime=nvidia",
+//   ],
+//   "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
+//   "workspaceFolder": "/${localWorkspaceFolderBasename}",
+//   "mounts": [
+//     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bash_history,target=/home/vscode/.bash_history,type=bind"
+//   ],
+//   "remoteUser": "vscode"
+// }
+
 {
   "name": "width_estimation_ubuntu-desktop-with-ros",
   "dockerFile": "Dockerfile",
@@ -6,19 +31,28 @@
     "eamodio.gitlens",
     "ms-azuretools.vscode-docker"
   ],
+  "build": {
+    "args": {
+      "CACHEBUST": "${CACHEBUST}"
+    }
+  },
   "runArgs": [
     "--privileged",
     "--network=host",
     "--ipc=host",
+    "--volume=/dev:/dev",
+    "--volume=/media:/media",
     "--env", "DISPLAY",
-    // add gpu support
+    "--device=/dev/ttyUSB0", // Add the specific device
     "--gpus", "all",
-    // "--runtime=nvidia",
   ],
-  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
-  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/${localWorkspaceFolderBasename},type=bind",
+  "workspaceFolder": "/home/vscode/${localWorkspaceFolderBasename}",
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bash_history,target=/home/vscode/.bash_history,type=bind"
   ],
-  "remoteUser": "vscode"
+  "remoteUser": "vscode",
+  "remoteEnv": {
+    "CACHEBUST": "${CACHEBUST}"
+  }
 }
