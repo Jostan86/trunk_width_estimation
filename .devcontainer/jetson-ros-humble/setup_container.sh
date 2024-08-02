@@ -1,1 +1,0 @@
-cd /trunk_width_estimation && pip install -e .

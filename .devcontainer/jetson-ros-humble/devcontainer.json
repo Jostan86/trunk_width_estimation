@@ -1,22 +1,22 @@
 {
   "name": "width_estimation_jetson",
-  "dockerFile": "Dockerfile",
-  // "image": "ultralytics/ultralytics:latest-jetson",
-  "extensions": [
-    "ms-python.python"
+  "dockerComposeFile": [
+    "../../docker/docker-compose-jetson.yml" 
   ],
-  "runArgs": [
-    "--privileged",
-    "--network=host",
-    "--runtime=nvidia",
-    "--ipc=host",
-    "-p", "65432:65432",
-    "--env", "DISPLAY",
-  ],
-  "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
-  "workspaceFolder": "/${localWorkspaceFolderBasename}",
+  "service": "trunk_width_estimation",
+  "workspaceFolder": "/home/vscode/trunk_width_estimation",
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.bash_history,target=/home/vscode/.bash_history,type=bind"
   ],
-  "remoteUser": "vscode"
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers"
+      ]
+    }
+  },
+  "overrideCommand": true
 }

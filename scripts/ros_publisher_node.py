@@ -8,6 +8,7 @@ from cv_bridge import CvBridge
 from pf_orchard_interfaces.msg import TreeImageData, TreeInfo, TreePosition
 from trunk_width_estimation import TrunkAnalyzer, PackagePaths
 import time
+import os
 
 class TrunkWidthEstimationNode(Node):
 
@@ -17,8 +18,8 @@ class TrunkWidthEstimationNode(Node):
         self.depth_queue = deque()
         self.rgb_queue = deque()
         
-        self.depth_sub = message_filters.Subscriber(self, Image, '/registered/depth/image')
-        self.rgb_sub = message_filters.Subscriber(self, Image, '/registered/rgb/image')
+        self.depth_sub = message_filters.Subscriber(self, Image, os.environ['DEPTH_IMAGE_TOPIC'])
+        self.rgb_sub = message_filters.Subscriber(self, Image, os.environ['RGB_IMAGE_TOPIC'])
         
         self.ts = message_filters.ApproximateTimeSynchronizer(
             [self.depth_sub, self.rgb_sub], 
@@ -31,7 +32,7 @@ class TrunkWidthEstimationNode(Node):
         self.cv_bridge = CvBridge()
         
         self.publisher = self.create_publisher(TreeImageData, 'tree_image_data', 10)
-        self.img_pub = self.create_publisher(Image, 'segmented_image', 10)
+        # self.img_pub = self.create_publisher(Image, 'segmented_image', 10)
         self.timer = self.create_timer(0.001, self.process_images)
         
         self.processing_images = False
@@ -66,28 +67,12 @@ class TrunkWidthEstimationNode(Node):
                 # self.find_matching_images(depth_msg, rgb_msg)
 
             self.processing_images = False
-    # def find_matching_images(self, depth_msg, rgb_msg):
-    #     if len(self.depth_queue) > 1 and len(self.rgb_queue) > 1:
-    #         next_depth_msg = self.depth_queue[0]
-    #         next_rgb_msg = self.rgb_queue[0]
-
-    #         if next_depth_msg.header.stamp == next_rgb_msg.header.stamp:
-    #             self.depth_queue.popleft()
-    #             self.rgb_queue.popleft()
-    #             self.do_work(next_depth_msg, next_rgb_msg)
-    #         else:
-    #             self.get_logger().warn('Could not find matching timestamps. Dropping images.')
-    #             self.depth_queue.popleft()
-    #             self.rgb_queue.popleft()
 
     def do_work(self, depth_msg: Image, rgb_msg: Image):
         
         depth_image = self.cv_bridge.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')
         rgb_image = self.cv_bridge.imgmsg_to_cv2(rgb_msg, desired_encoding='bgr8')
-        
-        if rgb_image is None or depth_image is None:
-            print("HELLO!")
-        
+              
         start_time = time.time()
         locations, widths, classes, img_x_positions, seg_img = self.trunk_analyzer.get_width_estimation_pf(depth_image, rgb_image=rgb_image)
         self.get_logger().info("Time taken: {}".format(time.time() - start_time))
@@ -119,7 +104,7 @@ class TrunkWidthEstimationNode(Node):
         tree_image_data.header = rgb_msg.header
               
         self.publisher.publish(tree_image_data)
-        self.img_pub.publish(tree_image_data.segmented_image)
+        # self.img_pub.publish(tree_image_data.segmented_image)
         
 
 def main(args=None):

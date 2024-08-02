@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel, ValidationError
 from typing import List
 import yaml
@@ -11,8 +12,7 @@ class ParametersWidthEstimation(BaseModel):
     post_class: int
     
     camera_horizontal_fov: float
-    
-    
+        
     pixel_width_segment_length: int
     pixel_width_percentile: float
     
@@ -37,8 +37,16 @@ class ParametersWidthEstimation(BaseModel):
     do_width_correction: bool
     
     @classmethod
-    def load_from_yaml(cls, file_path: str) -> 'ParametersWidthEstimation':
-        """Load parameters from a YAML file. Must have the same fields as the class."""
+    def load_from_yaml(cls, file_path: str, logging_level: int = logging.INFO) -> 'ParametersWidthEstimation':
+        """
+        Load parameters from a YAML file. Must have the same fields as the class.
+        
+        Args:
+            file_path (str): Path to the YAML file.
+            logging_level (int): Logging level to use.
+        """
+
+        logging.basicConfig(level=logging_level)
         logging.info(f"Loading parameters from {file_path}")
 
         if not os.path.exists(file_path):
@@ -55,10 +63,25 @@ class ParametersWidthEstimation(BaseModel):
             raise ValueError(f"Invalid data in parameter file: {e}")
                 
         parameters.log_settings()
+
+        # Override parameters with environment variables if they exist
+        if "WIDTH_CORRECTION_SLOPE" in os.environ:
+            logging.info("Overriding WIDTH_CORRECTION_SLOPE with environment variable")
+            parameters.width_correction_slope = float(os.environ["WIDTH_CORRECTION_SLOPE"])
+        else:
+            logging.info("Using WIDTH_CORRECTION_SLOPE from parameter file")
+        if "WIDTH_CORRECTION_INTERCEPT" in os.environ:
+            logging.info("Overriding WIDTH_CORRECTION_INTERCEPT with environment variable")
+            parameters.width_correction_intercept = float(os.environ["WIDTH_CORRECTION_INTERCEPT"])
+        else:
+            logging.info("Using WIDTH_CORRECTION_INTERCEPT from parameter file")
         
         return parameters
 
     def log_settings(self) -> None:
+        """
+        Log the current settings.
+        """
         logging.info("Current settings:")
         for name, value in self.model_dump().items():
             logging.info(f"{name}: {value}")

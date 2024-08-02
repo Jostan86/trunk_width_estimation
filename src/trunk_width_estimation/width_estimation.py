@@ -99,6 +99,9 @@ class TrunkAnalyzer:
         
         self._parameters = ParametersWidthEstimation.load_from_yaml(package_paths.config_file_path)
 
+        # self._parameters.width_correction_intercept = float(os.environ.get('WIDTH_CORRECTION_INTERCEPT'))
+        # self._parameters.width_correction_slope = float(os.environ.get('WIDTH_CORRECTION_SLOPE'))
+
         self._ignore_classes = np.array(self._parameters.ignore_classes)
 
         self._rgb_image = None

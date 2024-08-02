@@ -60,6 +60,6 @@ filter_position_score_threshold: 0.9
 # The intercept is just a constant offset error correction.
 # width_correction_slope: -0.000028 # meters per pixel
 # width_correction_intercept: -0.001 # meters
-width_correction_slope: 0 # meters per pixel
-width_correction_intercept: 0 # meters
+width_correction_slope: -0.000028 # meters per pixel
+width_correction_intercept: 0.001 # meters
 do_width_correction: True

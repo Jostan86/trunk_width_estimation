@@ -1,4 +1,5 @@
 import rclpy
+import rclpy.logging
 from rclpy.node import Node
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -15,19 +16,17 @@ class TrunkWidthEstimationService(Node):
         self.trunk_analyzer = TrunkAnalyzer(PackagePaths('width_estimation_config_apple.yaml'), combine_segmenter=True)
         self.bridge = CvBridge()
         self.width_estimation_service = self.create_service(TreeImageProcessing, 'trunk_width_estimation', self.width_estimation_service_callback)
+
+        self.get_logger().info('Trunk width estimation service has been started')
         
     def width_estimation_service_callback(self, req, res):
         
-        rgb_image = self.bridge.imgmsg_to_cv2(req.color_image, desired_encoding='bgr8')
+        rgb_image = self.bridge.imgmsg_to_cv2(req.color_image, desired_encoding='passthrough')
         depth_image = self.bridge.imgmsg_to_cv2(req.depth_image, desired_encoding='passthrough')
-        
-    
-        if rgb_image is None or depth_image is None:
-            print("HELLO!")
         
         start_time = time.time()
         locations, widths, classes, img_x_positions, seg_img = self.trunk_analyzer.get_width_estimation_pf(depth_image, rgb_image=rgb_image)
-        print("Time taken: ", time.time() - start_time)
+        self.get_logger().info("Time taken: {}".format(time.time() - start_time))
         tree_image_data = TreeImageData()
         
         if locations is None:
@@ -63,9 +62,9 @@ class TrunkWidthEstimationService(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_service = TrunkWidthEstimationService()
+    trunk_width_service = TrunkWidthEstimationService()
 
-    rclpy.spin(minimal_service)
+    rclpy.spin(trunk_width_service)
 
     rclpy.shutdown()
 

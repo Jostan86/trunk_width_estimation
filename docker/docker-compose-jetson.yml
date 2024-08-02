@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  trunk_width_estimation:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.jetson
+    volumes:
+      - ../:/home/vscode/trunk_width_estimation:rw
+      - /media/jostan:/media/jostan:rw
+    # privileged: true
+    network_mode: "host"
+    runtime: nvidia
+    ipc: "host"
+    user: vscode
+    command: ["python3", "/home/vscode/trunk_width_estimation/scripts/ros_node2.py"]
