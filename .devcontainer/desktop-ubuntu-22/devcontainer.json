@@ -12,8 +12,8 @@
     "--ipc=host",
     "--env", "DISPLAY",
     // add gpu support
-    "--gpus", "all",
-    // "--runtime=nvidia",
+    // "--gpus", "all",
+    "--runtime=nvidia",
   ],
   "workspaceMount": "source=${localWorkspaceFolder},target=/${localWorkspaceFolderBasename},type=bind",
   "workspaceFolder": "/${localWorkspaceFolderBasename}",

@@ -1,7 +1,5 @@
 FROM ubuntu:22.04
 
-# ARG CACHEBUST=1
-
 USER root
 
 # turn off interactive installation
@@ -41,13 +39,22 @@ RUN apt-get update \
 # Switch from root to user
 USER $USERNAME
 
+# Updtae pip
+RUN python3 -m pip install --upgrade pip
+
 RUN sudo apt-get update && \
     pip install ultralytics \
-    pip install scikit-image \ 
-    pip install opencv-python \
-    pip install pydantic \
     && sudo rm -rf /var/lib/apt/lists/*
 
+RUN sudo apt-get update && \
+    pip install scikit-image \ 
+    && sudo rm -rf /var/lib/apt/lists/*
+RUN sudo apt-get update && \
+    pip install opencv-python \
+    && sudo rm -rf /var/lib/apt/lists/*
+RUN sudo apt-get update && \
+    pip install pydantic \
+    && sudo rm -rf /var/lib/apt/lists/*
    
 # Update all packages
 RUN sudo apt update && sudo apt upgrade -y && sudo rm -rf /var/lib/apt/lists/*
