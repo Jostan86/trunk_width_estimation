@@ -36,3 +36,5 @@ pip install -e /path/to/trunk_width_estimation
 
 ## Usage
 ```usage_example.py``` in ```scripts/``` provides an example of how to use the trunk_segmenter and trunk_analyzer classes. It loads images from  ```/data/test_images/``` and displays the segmentations and prints the width_estimation results. The path on line 119 must be set to to the root directory of the package for it to work.
+
+A script to create a ROS2 node to subscribe to ROS topics from a Realsense D435 is also available at ```scrpts/ros_publisher_node.py```. It then publishes the data using custom message types from the [pf_orchard_interfaces](https://github.com/Jostan86/pf_orchard_interfaces) package. Alternatively, ```scripts/ros_service_node.py``` provides a ROS service that can be sent RGB-D data and returns the trunk width data. 
