@@ -22,7 +22,9 @@ source /path/to/venv/bin/activate
 
 The only python packages needed are the following:
 
-``` pip install ultralytics scikit-image opencv-python pydantic ```
+```bash
+pip install ultralytics scikit-image opencv-python pydantic 
+```
 
 Cuda packages may be needed for ultralytics to work, refer to the ultralytics documentation for that.
 
