@@ -123,7 +123,7 @@ if __name__ == "__main__":
     
     
     # There are two ways to use the trunk analyzer, it can be combined with the segmenter or kept separate. The
-    # ability to seperate was mainly added to allow for parallel processing of the analysis on the previous reults while
+    # ability to separate was mainly added to allow for parallel processing of the analysis on the previous results while
     # segmenting the next image. The combined version is slightly easier to use and is the default. 
     
     display_images(package_paths, start_img=1)

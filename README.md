@@ -5,18 +5,20 @@ This package is aimed at estimating the width of tree trunks from RGB-D data. A 
 
 ## Installation
 ### Option 1: VSCode Devcontainer
-If familiar, the easiest way to get started is likely using a VSCode devcontainer. A .devcontainer folder with several options is included in the repository. The desktop-ubuntu-22 option is likely the most useful.
+If familiar, the easiest way to get started is likely using a VSCode devcontainer. A .devcontainer folder with several options is included in the repository. The 'width_estimation_desktop' option is likely the most useful.
 
-Alternatively, the dockerfile in the devcontainer folder could also be used to make a docker container and developement can be done in there. 
+A GPU and Nvidia Runtime is needed for better processing, instructions to install Nvidia runtime are [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html). Alternatively, the code can be run on CPU, the ```runtime: nvidia``` argument in the docker compose file will have to be removed however.
+
+Alternatively, the dockerfiles folder could also be used to make a docker container and development can be done in there. 
 
 ### Option 2: Ubuntu 20.04/22.04
 A python virtual environment on linux should also work fine.
 
-```cd /where/you/want/to/install/venv```
-
-```python3.10 venv -m trunk_width_venv```
-
-Then activate: ```source /path/to/venv/bin/activate```
+```bash
+cd /where/you/want/to/install/venv
+python3.10 venv -m trunk_width_venv
+source /path/to/venv/bin/activate
+```
 
 The only python packages needed are the following:
 
@@ -27,9 +29,10 @@ Cuda packages may be needed for ultralytics to work, refer to the ultralytics do
 ### Installing the package
 To install the package itself with pip, first download the repository, then install the package in editable mode.
 
-```git clone https://github.com/Jostan86/trunk_width_estimation.git```
-
-```pip install -e /path/to/trunk_width_estimation```
+```bash
+git clone https://github.com/Jostan86/trunk_width_estimation.git
+pip install -e /path/to/trunk_width_estimation
+```
 
 ## Usage
 ```usage_example.py``` in ```scripts/``` provides an example of how to use the trunk_segmenter and trunk_analyzer classes. It loads images from  ```/data/test_images/``` and displays the segmentations and prints the width_estimation results. The path on line 119 must be set to to the root directory of the package for it to work.

@@ -4,11 +4,13 @@ services:
   trunk_width_estimation:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.jetson
+      dockerfile: docker/Dockerfile.desktop
     volumes:
       - ../:/home/vscode/trunk_width_estimation:rw
     network_mode: "host"
     runtime: nvidia
+    environment:
+      - DISPLAY=${DISPLAY}
     ipc: "host"
     user: vscode
     command: ["python3", "/home/vscode/trunk_width_estimation/scripts/ros_publisher_node.py"]

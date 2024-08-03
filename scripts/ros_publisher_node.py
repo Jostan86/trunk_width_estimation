@@ -3,7 +3,6 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from collections import deque
 import message_filters
-# from .optical_flow_odom import OpticalFlowOdometer
 from cv_bridge import CvBridge
 from pf_orchard_interfaces.msg import TreeImageData, TreeInfo, TreePosition
 from trunk_width_estimation import TrunkAnalyzer, PackagePaths
@@ -11,6 +10,9 @@ import time
 import os
 
 class TrunkWidthEstimationNode(Node):
+    """
+    This class subscribes to the depth and rgb image topics and publishes the data from the trunk width estimation.
+    """
 
     def __init__(self):
         super().__init__('trunk_width_estimation')

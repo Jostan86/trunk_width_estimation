@@ -8,9 +8,11 @@ from pf_orchard_interfaces.srv import TreeImageProcessing
 import time
 from trunk_width_estimation import TrunkAnalyzer, PackagePaths
 from std_msgs.msg import Bool
-#!/usr/bin/env python
 
 class TrunkWidthEstimationService(Node):
+    """
+    This class provides a the width estimation as a ros service.
+    """
     def __init__(self):
         super().__init__('trunk_width_estimation_service')
         self.trunk_analyzer = TrunkAnalyzer(PackagePaths('width_estimation_config_apple.yaml'), combine_segmenter=True)
