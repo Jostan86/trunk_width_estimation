@@ -29,12 +29,25 @@ pip install ultralytics scikit-image opencv-python pydantic
 Cuda packages may be needed for ultralytics to work, refer to the ultralytics documentation for that.
 
 ### Installing the package
-To install the package itself with pip, first download the repository, then install the package in editable mode.
+To install the package itself with pip, first download the repository, then install the package. The ```-e``` option installs it editable mode.
 
 ```bash
 cd /path/to/workspace
 git clone https://github.com/Jostan86/trunk_width_estimation.git
 pip install -e /path/to/trunk_width_estimation
+```
+### Installing pf_orchard_interfaces
+To use the ```ros_service_node.py``` and ```ros_publisher_node.py``` scripts as ROS2 nodes, messages from the [pf_orchard_interfaces](https://github.com/Jostan86/pf_orchard_interfaces) package are needed. These can be installed with the below commands, change ~/ros2_pf_ws to where you'd like your workspace.
+```bash
+mkdir -p ~/ros2_pf_ws/src
+cd ~/ros2_pf_ws/src
+git clone https://github.com/Jostan86/pf_orchard_interfaces.git
+cd ..
+colcon build
+```
+Then the workspace will also need to be sourced for any terminal using it. 
+```bash
+source ~/ros2_pf_ws/install/setup.bash
 ```
 
 ## Usage
