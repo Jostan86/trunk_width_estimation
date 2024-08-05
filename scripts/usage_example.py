@@ -127,4 +127,4 @@ if __name__ == "__main__":
     # segmenting the next image. The combined version is slightly easier to use and is the default. 
     
     display_images(package_paths, start_img=1)
-    # display_images_segmenter_separate(start_img=200)
+    # display_images_segmenter_separate(package_paths, start_img=1)
