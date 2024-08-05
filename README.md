@@ -16,7 +16,7 @@ A python virtual environment on linux should also work fine.
 
 ```bash
 cd /where/you/want/to/install/venv
-python3.10 venv -m trunk_width_venv
+python3.10 -m venv trunk_width_venv
 source /path/to/venv/bin/activate
 ```
 
