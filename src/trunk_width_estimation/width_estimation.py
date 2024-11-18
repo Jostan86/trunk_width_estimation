@@ -44,6 +44,7 @@ class TrunkAnalyzerData:
        
         self.rgb_image: np.ndarray = None
         self.depth_image: np.ndarray = None
+        self.saved_seg: np.ndarray = None
 
         self.confidences: np.ndarray = None
         self.masks: np.ndarray = None
@@ -262,7 +263,10 @@ class TrunkAnalyzerData:
     def num_instances(self):
         return None if self.confidences is None else len(self.confidences)
     
-    
+    def set_saved_seg_to_current(self):
+        """Set the unfiltered segmentation to the current segmentation."""
+        self.saved_seg = self.visualize_segmentation()
+
     def visualize_segmentation(self, add_mask_num: bool = False) -> np.ndarray:
         """Draw the segmentation on the rgb image."""
         rgb_image = self.rgb_image.copy()
@@ -1848,7 +1852,7 @@ class TrunkAnalyzer:
         self.parameters = ParametersWidthEstimation.load_from_yaml(self.package_paths.config_file_path)
         self.set_parameters(self.parameters)
     
-    def get_width_estimation(self, trunk_analyzer_data: TrunkAnalyzerData):
+    def get_width_estimation(self, trunk_analyzer_data: TrunkAnalyzerData, save_unfiltered_segmentation: bool=False):
         """Run the full algorithm to get the width estimation on a new image.
         
         Args:
@@ -1857,16 +1861,22 @@ class TrunkAnalyzer:
         Returns:
             TrunkAnalyzerData: Data class with the results of the width estimation.
         """
-        for operation in self.operations:
+        if self.trunk_segmenter is not None:
+            trunk_analyzer_data = self.trunk_segmenter.check_and_run(trunk_analyzer_data)
+
+        if save_unfiltered_segmentation:
+            trunk_analyzer_data.set_saved_seg_to_current()
+
+        for operation in self.operations[1:]:
             if operation.employ_operation:
                 trunk_analyzer_data = operation.check_and_run(trunk_analyzer_data)    
 
         return trunk_analyzer_data
 
-    def get_width_estimation_pf(self, trunk_analyzer_data: TrunkAnalyzerData):
+    def get_width_estimation_pf(self, trunk_analyzer_data: TrunkAnalyzerData, save_unfiltered_segmentation: bool=False):
         """Helper function to run the particle filter code on a new image."""
 
-        trunk_analyzer_data = self.get_width_estimation(trunk_analyzer_data)
+        trunk_analyzer_data = self.get_width_estimation(trunk_analyzer_data, save_unfiltered_segmentation=save_unfiltered_segmentation)
         
         if trunk_analyzer_data.num_instances is not None:
             # Switch sign on x_pos and y_pos to match the coordinate system of the particle filter
