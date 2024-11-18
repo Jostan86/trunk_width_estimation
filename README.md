@@ -1,7 +1,7 @@
 # Trunk Width Estimation
 
 ## Description 
-This package is aimed at estimating the width of tree trunks from RGB-D data. A YOLOv8 model is used to segment the trunks and posts in the images. From the segmentation mask the pixel width of the trunk can be determined. The aligned depth can then be used to calculate the real-world width.
+This package is aimed at estimating the width of tree trunks from RGB-D data. A YOLOv8 model is used to segment the trunks and posts in the images. From the segmentation mask the pixel width of the trunk can be determined. The aligned depth can then be used to calculate the real-world width. Scroll through the [jupyter notebook](https://github.com/Jostan86/trunk_width_estimation/blob/main/scripts/usage_example.ipynb) to see a visualization of the estimation process.
 
 ## Installation
 ### Option 1: VSCode Devcontainer
@@ -112,7 +112,7 @@ All of the below scripts should be ready to run without any setup if using the d
 ```usage_example.py``` in ```scripts/``` provides an example of how to use the TrunkAnalyzer and TrunkSegmenter classes. It loads images from  ```trunk_width_estimation_package_data/test_images/``` and displays the segmentations and prints the width_estimation results. The path at the end must be set, or the environment variables setup as shown above in [Handling Paths](#handling-paths). The 'Main Data' is needed for this script (see [Package Data](#package-data)).
 
 ### Jupyter Notebook
-A Jupyter notebook has been setup at ```scripts/usage_example.ipynb``` that illustrates how the package works by stepping through each of the steps in the process and showing a visualization of it. The 'Main Data' is needed for this script (see [Package Data](#package-data)).
+A Jupyter notebook has been setup [here](https://github.com/Jostan86/trunk_width_estimation/blob/main/scripts/usage_example.ipynb) at ```scripts/usage_example.ipynb```  that illustrates how the package works by stepping through each of the steps in the process and showing a visualization of it. The 'Main Data' is needed for this script (see [Package Data](#package-data)).
 
 ### ROS Scripts
 

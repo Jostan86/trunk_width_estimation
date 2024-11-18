@@ -14,14 +14,8 @@ import json
 import pandas as pd
 import logging
 
-# import rclpy
-# from rclpy.node import Node
-# from sensor_msgs.msg import Image
-# from pf_orchard_interfaces.msg import TreeImageData, TreeInfo, TreePosition
-# from cv_bridge import CvBridge
-# from message_filters import ApproximateTimeSynchronizer, Subscriber
-
 def import_ros2_modules():
+    """A function to separate the ROS2 module imports so they can be imported only if needed."""
     if not TrunkAnalyzerData.ros_2_modules_imported:
         try:
             from pf_orchard_interfaces.msg import TreeImageData
@@ -607,7 +601,8 @@ class TrunkAnalyzerAbstractOperation:
                     title: str,
                     xlabel: str,
                     used_value: float=None,
-                    used_value_label: str=None) -> np.ndarray:
+                    used_value_label: str=None,
+                    unit: str = '') -> np.ndarray:
         """Make a histogram of the values.
 
         Args:
@@ -661,14 +656,14 @@ class TrunkAnalyzerAbstractOperation:
             ax.hist(over_max_representation,
                     bins=np.arange(min_value, max_value + step_size, step_size),
                     alpha=0.5, 
-                    label=f"Values Over {max_value-step_size}mm",
+                    label=f"Values Over {max_value-step_size} {unit}",
                     color='orange')
         if under_min > 0:
             under_min_representation = np.ones(under_min) * (min_value + step_size/2)
             ax.hist(under_min_representation,
                     bins=np.arange(min_value, max_value, step_size),
                     alpha=0.5, 
-                    label=f"Values Under {min_value+step_size}mm",
+                    label=f"Values Under {min_value+step_size} {unit}",
                     color='red')
         
         # Add a line for the used value
@@ -1187,7 +1182,7 @@ class DepthCalculation(TrunkAnalyzerAbstractOperation):
         vis_image = trunk_analyzer_data.visualize_segmentation()
         depth_image = trunk_analyzer_data.visualize_depth_image()
 
-#        add a line at the top and bottom ignore values
+        # add a line at the top and bottom ignore values
         cv2.line(vis_image, (0, self.top_ignore), (trunk_analyzer_data.cropped_width, self.top_ignore), (0, 0, 255), 2)
         cv2.line(vis_image, (0, self.bottom_ignore), (trunk_analyzer_data.cropped_width, self.bottom_ignore), (0, 0, 255), 2)
 
@@ -1249,9 +1244,10 @@ class DepthCalculation(TrunkAnalyzerAbstractOperation):
                                                   step_size,
                                                   i,
                                                   "Mask {} Depth Histogram".format(i + 1),
-                                                  "Depth (m)",
+                                                  "Depth (mm)",
                                                   used_value=trunk_analyzer_data.depth_estimates[i] * 1000,
-                                                  used_value_label="{} percentile".format(self.parameters.depth_calc_percentile))
+                                                  used_value_label="{} percentile".format(self.parameters.depth_calc_percentile),
+                                                  unit="mm")
             
             visualization_hist = ProcessVisualization("Depth Histogram Mask {}".format(i + 1))
             visualization_hist.explanation = f"A histogram of the depth values for mask {i + 1}. The {self.parameters.depth_calc_percentile} " \
@@ -1615,9 +1611,9 @@ class WidthEstimation(TrunkAnalyzerAbstractOperation):
             visualization_data["rightmost_pixel_columns"] = rightmost_pixel_columns
             visualization_data["x_coords"] = x_coords
             visualization_data["y_coords"] = y_coords
-            visualization_data["widths"] = widths
-            visualization_data["corrected_widths"] = corrected_widths
-            visualization_data["width_estimate"] = width_estimate
+            visualization_data["pixel_widths"] = widths
+            visualization_data["corrected_pixel_widths"] = corrected_widths
+            visualization_data["pixel_width_estimate"] = width_estimate
             self.width_vis_data_all.append(visualization_data)
 
         return width_estimate   
@@ -1640,31 +1636,40 @@ class WidthEstimation(TrunkAnalyzerAbstractOperation):
         self.visualizations = []
 
         if trunk_analyzer_data.num_instances is None:
-            visualization = ProcessVisualization("Width Estimation")
-            visualization.explanation = "No instances were found in the image so the width estimation could not be performed."
-            visualization.set_image(vis_image1)
-            visualization.extra_detail_only = False 
-            self.visualizations.append(visualization)
+            visualization_2 = ProcessVisualization("Width Estimation")
+            visualization_2.explanation = "No instances were found in the image so the width estimation could not be performed."
+            visualization_2.set_image(vis_image1)
+            visualization_2.extra_detail_only = False 
+            self.visualizations.append(visualization_2)
             self.num_extra_detail_visualizations = 0
             return            
 
         for visualization_data in self.width_vis_data_all:
-            leftmost_pixel_columns = visualization_data["leftmost_pixel_columns"]
-            rightmost_pixel_columns = visualization_data["rightmost_pixel_columns"]
             x_coords = visualization_data["x_coords"]
             y_coords = visualization_data["y_coords"]
 
             for i in [-1, 0, 1]:
-                # vis_image1[y_coords, leftmost_pixel_columns+i] = [0, 255, 0]
-                # vis_image1[y_coords, rightmost_pixel_columns+i] = [0, 255, 0]
                 vis_image1[y_coords, x_coords+i] = [255, 0, 0]
         
-        vis_image_2 = vis_image1.copy()
+        visualization_1 = ProcessVisualization("Width Estimation: Segmentation Edges")
+        visualization_1.explanation = "The mask edges are shown in green, and the center of the mask is shown in blue."
+        visualization_1.set_image(vis_image1)
+        visualization_1.extra_detail_only = True
+        self.visualizations.append(visualization_1)
 
-        for visualization_data in self.width_vis_data_all:
+        vis_image_2 = vis_image1.copy()
+        visualization_2 = ProcessVisualization("Width Estimation: Width Calculation")
+        visualization_2.add_metric("Segment Length:", self.parameters.pixel_width_segment_length)
+        visualization_2.add_metric("Percentile:", self.parameters.pixel_width_percentile)
+
+        for mask_num, visualization_data in enumerate(self.width_vis_data_all):
+            visualization_2.add_metric("", "")
+            visualization_2.add_metric("Mask {}:".format(mask_num + 1), "")
+            visualization_2.add_metric("Pixel Width Estimate:", visualization_data["pixel_width_estimate"], num_decimal_places=2)
+
             y_coords = visualization_data["y_coords"]
             x_coords = visualization_data["x_coords"]
-            corrected_widths = visualization_data["corrected_widths"]
+            corrected_widths = visualization_data["corrected_pixel_widths"]
             
             segment_length = self.parameters.pixel_width_segment_length
             for i in range(0, len(y_coords) - segment_length, segment_length):
@@ -1689,23 +1694,18 @@ class WidthEstimation(TrunkAnalyzerAbstractOperation):
                          (0, 255, 0),
                          2)
                 
-        visualization = ProcessVisualization("Width Estimation: Segmentation Edges")
-        visualization.explanation = "The mask edges are shown in green, and the center of the mask is shown in blue."
-        visualization.set_image(vis_image1)
-        visualization.extra_detail_only = True
-        self.visualizations.append(visualization)
+        
 
-        visualization = ProcessVisualization("Width Estimation: Width Calculation")
-        visualization.explanation = f"The center-line of the segmentation (blue line) is the points between the right and left side of " \
+        visualization_2.explanation = f"The center-line of the segmentation (blue line) is the points between the right and left side of " \
                                     f"the mask at each row. The width is first calculated as the number of pixels between the right and " \
                                     f"left side of the mask along a particular row of the image. Then the angle between each " \
                                     f"{self.parameters.pixel_width_segment_length}th pixel along the center-line (red lines) is used to " \
                                     f"adjust the original width, these adjusted widths are shown in green." 
-        visualization.set_image(vis_image_2)
-        self.visualizations.append(visualization)
+        visualization_2.set_image(vis_image_2)
+        self.visualizations.append(visualization_2)
 
         for i, visualization_data in enumerate(self.width_vis_data_all):
-            corrected_widths = visualization_data["corrected_widths"]
+            corrected_widths = visualization_data["corrected_pixel_widths"]
 
 
             histogram_image = self.make_histogram(corrected_widths,
@@ -1715,8 +1715,9 @@ class WidthEstimation(TrunkAnalyzerAbstractOperation):
                                                   mask_num=i+1,
                                                   title="Width Histogram Mask {}".format(i + 1),
                                                   xlabel="Width (pixels)",
-                                                  used_value=visualization_data["width_estimate"],
-                                                  used_value_label="{} percentile".format(self.parameters.pixel_width_percentile))
+                                                  used_value=visualization_data["pixel_width_estimate"],
+                                                  used_value_label="{} percentile".format(self.parameters.pixel_width_percentile),
+                                                  unit="px")
             
             visualization_hist = ProcessVisualization("Width Estimates Histogram {}".format(i + 1))
             visualization_hist.explanation = f"A histogram of the width estimates for mask {i + 1}. The {self.parameters.pixel_width_percentile} " \
