@@ -1,0 +1,80 @@
+FROM pf-app-image:l4t-r36.3.0
+# pf-app-image is an image built using the jetson-containers tool made by dustynv: https://github.com/dusty-nv/jetson-containers
+# The image is built with the following command:
+# jetson-containers build --name=pf-app-image pytorch tensorflow2 onnxruntime ros:humble-desktop
+
+USER root
+
+# Add vscode user with same UID and GID as your host system
+# (copied from https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user#_creating-a-nonroot-user)
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create a non-root user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && mkdir /home/$USERNAME/.config && chown ${USER_UID}:${USER_GID} /home/$USERNAME/.config
+
+# Set up sudo
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch from root to user
+USER $USERNAME
+
+# Add user to video group to allow access to webcam
+RUN sudo usermod --append --groups video $USERNAME
+
+# Install stuff
+RUN sudo apt-get update && \
+    pip install ultralytics \
+    pip install scikit-image \ 
+    pip install importlib_resources \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+RUN sudo apt-get update && \
+    sudo apt-get install -y \
+    git \
+    libgl1-mesa-glx \
+    python3-pyqt5 \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+# set the ROS_DISTRO
+ENV ROS_DISTRO=humble
+ENV ROS_WS_ROOT=/home/${USERNAME}/ros2_ws
+
+# Make a ros2 workspace
+RUN mkdir -p ${ROS_WS_ROOT}/src
+
+# Clone the interface pacakge into the workspace, the first line just invalidates the cache if the version of the package has changed
+ADD https://api.github.com/repos/Jostan86/pf_orchard_interfaces/git/refs/heads/main /home/${USERNAME}/.pf_orchard_interfaces_version.json
+RUN cd ${ROS_WS_ROOT}/src && git clone https://github.com/Jostan86/pf_orchard_interfaces.git
+
+# Build the workspace
+RUN cd ${ROS_WS_ROOT} && . /opt/ros/${ROS_DISTRO}/install/setup.sh && colcon build
+
+ENV WIDTH_ESTIMATION_PACKAGE_PATH=/home/${USERNAME}/trunk_width_estimation
+
+# Add the ROS setup to the bashrc
+RUN echo "source /opt/ros/${ROS_DISTRO}/install/setup.bash" >> ~/.bashrc
+RUN echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# These (should / should help to) force the gui applications to show up only on the remote display window
+ENV DISPLAY=:0
+ENV REMOTE_CONTAINERS_DISPLAY_SOCK=/tmp/.X11-unix/X0
+
+ENV WORKSPACE_ROOT=/home/${USERNAME}/trunk_width_estimation
+# Copy the package into the container and install it
+COPY --chown=${USERNAME}:${USERNAME} . ${WORKSPACE_ROOT}
+RUN pip install -e ${WORKSPACE_ROOT}
+
+# Copy the entrypoint script with the correct permissions
+COPY docker/entrypoint_ros_jetson.sh /
+RUN sudo chmod +x /entrypoint_ros_jetson.sh
+ENTRYPOINT ["/entrypoint_ros_jetson.sh"]
+
+USER root

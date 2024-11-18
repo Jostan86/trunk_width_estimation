@@ -1,0 +1,127 @@
+FROM osrf/ros:humble-desktop-full
+
+USER root
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install stuff
+RUN apt-get update \
+    && apt-get install -y \
+    curl \
+    unzip \
+    git \
+    python3-pip \
+    python3-opencv \
+    libgl1 \
+    libegl1 \
+    libglib2.0-0 \
+    libxrender1 \
+    libsm6 \
+    libxext6 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxcb-cursor0 \
+    libxcb-dri3-0 \
+    libxcb-glx0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-present0 \
+    libxcb-randr0 \
+    libxcb-render-util0 \
+    libxcb-shape0 \
+    libxcb-shm0 \
+    libxcb-sync1 \
+    libxcb-xfixes0 \
+    libxcb-xinerama0 \
+    libxcb-xkb1 \
+    libxkbcommon-x11-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add vscode user with same UID and GID as your host system
+# (copied from https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user#_creating-a-nonroot-user)
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create a non-root user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd -s /bin/bash --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && mkdir /home/$USERNAME/.config && chown ${USER_UID}:${USER_GID} /home/$USERNAME/.config
+
+# Set up sudo
+RUN apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch from root to user
+USER $USERNAME
+
+# Update pip
+RUN python3 -m pip install --upgrade pip
+
+RUN sudo apt-get update && \
+    pip install ultralytics scikit-image opencv-python pydantic pyqt6 pandas matplotlib superqt\ 
+    && sudo rm -rf /var/lib/apt/lists/*
+     
+# set the ROS_DISTRO
+ENV ROS_DISTRO=humble
+ENV ROS_WS_ROOT=/home/${USERNAME}/ros2_ws
+
+# Make a ros2 workspace
+RUN mkdir -p ~/ros2_ws/src
+
+# Clone the interface pacakge into the workspace, the first line just invalidates the cache if the version of the package has changed
+ADD https://api.github.com/repos/Jostan86/pf_orchard_interfaces/git/refs/heads/main /home/${USERNAME}/.pf_orchard_interfaces_version.json
+RUN cd ~/ros2_ws/src && git clone https://github.com/Jostan86/pf_orchard_interfaces.git -b main
+
+# Build the workspace
+RUN cd ${ROS_WS_ROOT} && . /opt/ros/${ROS_DISTRO}/setup.sh && colcon build
+
+# Update all packages
+RUN sudo apt update && sudo apt upgrade -y && sudo rm -rf /var/lib/apt/lists/*
+
+# Some packages require numpy 1
+RUN pip install numpy==1.26.4
+
+# Source the ROS setup file
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+
+ENV WIDTH_ESTIMATION_PACKAGE_DATA_PATH=/home/${USERNAME}/trunk_width_estimation_data
+
+RUN mkdir -p ${WIDTH_ESTIMATION_PACKAGE_DATA_PATH}
+
+# Download and unzip the data files
+# Made links using instructions here: https://askubuntu.com/a/1211122
+RUN curl -L "https://ivzkiw.bn.files.1drv.com/y4mDYz1RspetmfTiR6rwGZEAwpX9CTuxylqPxaC7cjgM0GRtMjdNNVPgpXThrFl5E83DQLQOZ7aYHZE8_utaQVjE8uMxtffzVmmpJWbzSlMnhuDsa9uCWWbjjaDvpvYIoEtYtBjYeEYrzOTkNbmPeCMN9-dlEtOxl_Ply5SUR66ixiWgU-Zm5AS7F23ecdpQkaExYU0kINte1nQIkL5tcUKEQ" \
+    -o /tmp/main_data.zip\ 
+    && unzip /tmp/main_data.zip -d ${WIDTH_ESTIMATION_PACKAGE_DATA_PATH} \
+    && rm /tmp/main_data.zip
+RUN curl -L "https://vmolxg.bn.files.1drv.com/y4mXpgogvrdIKNFt8NhRk8103kQ1D1LAwyK6I_oHI0HNIRx7eEaRPYO5kgu1t-gY_LlHGvuvQR0c1Xao002DNMohItm_SC0eyq8VgnmXW00fHqmCe5vNmKMpC5OlFe9Grnq9TutXeiEtlM5Uh_nDSHejkt7LqgK4MLHvIzwWtVZqFkSDq9iqMW9qDMddUODj1UkvgUEm0-cbBx6i4XQeNZWwA" \
+    -o /tmp/analysis_data.zip \ 
+    && unzip /tmp/analysis_data.zip -d ${WIDTH_ESTIMATION_PACKAGE_DATA_PATH} \
+    && rm /tmp/analysis_data.zip
+
+# Copy the package into the container and install it
+ENV WIDTH_ESTIMATION_PACKAGE_PATH=/home/${USERNAME}/trunk_width_estimation
+COPY --chown=${USERNAME}:${USERNAME} . ${WIDTH_ESTIMATION_PACKAGE_PATH}
+RUN pip install -e ${WIDTH_ESTIMATION_PACKAGE_PATH}
+
+
+
+# Copy the entrypoint script with the correct permissions
+COPY docker/entrypoint_ros_desktop.sh /
+RUN sudo chmod +x /entrypoint_ros_desktop.sh
+ENTRYPOINT ["/entrypoint_ros_desktop.sh"]
+
+# Create the .bash_history file and set permissions
+RUN touch /home/$USERNAME/.bash_history \
+    && chown $USERNAME:$USERNAME /home/$USERNAME/.bash_history
+
+# Set environment variables for bash history
+ENV HISTFILE=/home/$USERNAME/.bash_history
+
+USER root

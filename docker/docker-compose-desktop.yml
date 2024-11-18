@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  trunk_width_estimation:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.desktop
+    volumes:
+      - ../:/home/vscode/trunk_width_estimation:rw
+    network_mode: "host"
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - DISPLAY=${DISPLAY}
+      - DEPTH_IMAGE_TOPIC=/camera/camera/aligned_depth_to_color/image_raw
+      - RGB_IMAGE_TOPIC=/camera/camera/color/image_raw
+    ipc: "host"
+    user: vscode
+    command: ["python3", "/home/vscode/trunk_width_estimation/scripts/ros_publisher_node.py"]

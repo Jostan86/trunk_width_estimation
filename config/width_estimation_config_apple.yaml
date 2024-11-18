@@ -1,0 +1,107 @@
+# ----------------------
+# Settings for jazz apple dataset
+# ----------------------
+
+# ----------------------
+# MODEL SETTINGS
+# Path to the model file
+# Must be in the data/models directory
+yolo_model_to_use: "jazz_s_v8.pt"  # for desktop (string)
+# yolo_model_to_use: "jazz_s_float16_v8.engine"  # for jetson
+seg_model_confidence_threshold: 0.7  # (float)
+seg_model_nms_threshold: 0.01        # (float)
+# ----------------------
+
+# ----------------------
+# OBJECT CLASS SETTINGS
+# The class number for the trunk and post classes
+# These are the class numbers in the MODEL, this will be used to change them so that trunk is 0 and post is 1, and others are 2
+seg_model_trunk_class: 2    # (int)
+seg_model_post_class: 0     # (int)
+# ----------------------
+
+# ----------------------
+# CAMERA SETTINGS
+# The camera horizontal field of view in degrees
+# For realsense with 640x480 resolution
+camera_horizontal_fov: 55.0  # degrees (float)
+# For realsense with 848x480 or 1280x720 resolution
+# horz_fov: 69.4  # degrees
+# ----------------------
+
+# ----------------------
+# WIDTH CALCULATION SETTINGS
+# Length of the segment to use for calculating the local angle of the trunk when calculating the pixel width of the mask
+pixel_width_segment_length: 15    # pixels (int)
+# Percentile of the pixel width to use for the pixel width estimate. So at 0.5, it's just the median.
+pixel_width_percentile: 50.0      # (float)
+# ----------------------
+
+# ----------------------
+# DEPTH CALCULATION SETTINGS / FILTERS
+# Proportion of the top of the image to ignore mask points in when calculating the depth. 
+depth_calc_top_ignore: 0.5        # (float)
+# Proportion of the bottom of the image to ignore mask points in when calculating the depth.
+depth_calc_bottom_ignore: 0.2     # (float)
+# Minimum number of valid depth points needed to keep the mask, if less than this, disregard the mask.
+depth_calc_min_num_points: 500    # pixels (int)
+# Percentile of the depth values to use for the depth estimate. So at 65, the percentile depth will be farther than 
+# 65% of the points in the mask.
+depth_calc_percentile: 65.0       # (float)
+# ----------------------
+
+# ----------------------
+# NMS FILTER
+# The threshold for the non-maximum suppression algorithm for differing classes (Yolo does it for the same class)
+# If the overlap between two masks is greater than this value, the mask with the lower score will be removed. (0.5 is a full overlap, so use 0.0 to 0.5)
+filter_nms_overlap_threshold: 0.3 # (float)
+# This filter is optional
+include_nms_filter: True
+# ----------------------
+
+# ----------------------
+# DEPTH FILTER
+# The maximum distance allowed for trees, if farther than this the segmentation is removed
+filter_depth_max_depth: 2.0       # meters (float)
+# This filter is optional
+include_depth_filter: True
+# ----------------------
+
+# ----------------------
+# EDGE FILTER
+# Remove masks that are too close to the edge of the image.
+# Proportion of the image width that is considered the edge.
+filter_edge_edge_threshold: 0.05  # (float)
+# Proportion of the mask that must be in the edge 'zone' for the mask to be removed.
+filter_edge_size_threshold: 0.1   # (float)
+# This filter is optional
+include_edge_filter: True
+# ----------------------
+
+# ----------------------
+# POSITION FILTER
+# Remove masks that are too high or too low in the image.
+# If the bottom of the mask is above this threshold, the mask is considered to be too high and is removed.
+# The value is the percentage of the image height up from the bottom.
+filter_position_bottom_threshold: 0.5   # (float)
+# If the top of the mask is below this threshold, the mask is considered to be too low.
+# The value is the percentage of the image height down from the top.
+filter_position_top_threshold: 0.65    # (float)
+# Not actually used right now, but was used to keep masks regardless of position if the score was high enough.
+filter_position_score_threshold: 0.9    # (float)
+# This filter is optional
+include_position_filter: True
+# ----------------------
+
+# ----------------------
+# WIDTH CORRECTION
+# Used to correct the width based on the position of the object in the image, as objects near the edge of the image
+# appear wider than they are. So corrected_width = width * (slope * seg_pixels_from_center) + intercept
+# The intercept is just a constant offset error correction.
+# Values obtained from calibrate_widths.py, sept = True ... maybe
+# width_correction_slope: -0.000028 # meters per pixel
+# width_correction_intercept: -0.001 # meters
+width_correction_slope: -0.000028 # meters per pixel (float)
+width_correction_intercept: 0.001 # meters (float)
+# This operation is optional
+include_width_correction: True

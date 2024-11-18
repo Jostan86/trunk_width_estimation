@@ -1,0 +1,4 @@
+*.pyc
+src/trunk_width_estimation.egg-info/*
+*.insyncdl
+trunk_width_estimation_package_data/*

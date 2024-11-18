@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  trunk_width_estimation:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.jetson
+    volumes:
+      - ../:/home/vscode/trunk_width_estimation:rw
+    network_mode: "host"
+    runtime: nvidia
+    ipc: "host"
+    user: vscode
+    environment:
+      - DEPTH_IMAGE_TOPIC=/throttled/registered/depth/image
+      - RGB_IMAGE_TOPIC=/throttled/registered/rgb/image
+      - WIDTH_CORRECTION_INTERCEPT=0.001
+      - WIDTH_CORRECTION_SLOPE=-0.000028
+    command: ["python3", "/home/vscode/trunk_width_estimation/scripts/ros_publisher_node.py"]
